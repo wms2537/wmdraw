@@ -21,7 +21,7 @@ class DrawScreen extends StatefulWidget {
 class DrawScreenState extends State<DrawScreen> with TickerProviderStateMixin {
   GlobalKey globalKey = GlobalKey();
   late AnimationController controller;
-  List<Offset?> points = <Offset?>[];
+  List<Offset> points = <Offset>[];
   Color color = Colors.black;
   StrokeCap strokeCap = StrokeCap.round;
   double strokeWidth = 5.0;
@@ -29,6 +29,8 @@ class DrawScreenState extends State<DrawScreen> with TickerProviderStateMixin {
   List<Painter> undonePainters = <Painter>[];
   Matrix4 _transformation = Matrix4.identity();
   int totalPoints = 0;
+  int pannedPoints = 0;
+  int? scrollBtnId = null;
 
   @override
   void initState() {
@@ -41,10 +43,14 @@ class DrawScreenState extends State<DrawScreen> with TickerProviderStateMixin {
 
   void savePath() {
     painters.add(Painter(
-        points: points.toList(),
+        points: points
+            .map((e) => MatrixUtils.transformPoint(
+                Matrix4.inverted(_transformation), e))
+            .toList(),
         color: color,
         strokeCap: strokeCap,
-        strokeWidth: strokeWidth));
+        strokeWidth: strokeWidth)
+      ..transformation = _transformation);
     points.clear();
   }
 
@@ -57,11 +63,25 @@ class DrawScreenState extends State<DrawScreen> with TickerProviderStateMixin {
     _transformation.multiply(transformation);
 
     setState(() {
-      for (var painter in painters) {
-        painter.points = painter.points
-            .map((e) => MatrixUtils.transformPoint(
-                Matrix4.inverted(transformation), e!))
-            .toList();
+      final numPainters = painters.length;
+      for (int i = numPainters - 1; i >= 0; --i) {
+        painters[i].transformation.multiply(Matrix4.inverted(transformation));
+        // painters[i].strokeWidth =
+        //     painters[i].strokeWidth / transformation.row0.storage[0];
+      }
+      points = new List.from(points);
+    });
+  }
+
+  void translateTransform(double dx, double dy) {
+    final transformation = Matrix4.translationValues(-dx, -dy, 0);
+
+    _transformation.multiply(transformation);
+
+    setState(() {
+      final numPainters = painters.length;
+      for (int i = numPainters - 1; i >= 0; --i) {
+        painters[i].transformation.multiply(Matrix4.inverted(transformation));
       }
       points = new List.from(points);
     });
@@ -74,8 +94,23 @@ class DrawScreenState extends State<DrawScreen> with TickerProviderStateMixin {
       body: Stack(
         children: [
           Listener(
+            onPointerDown: (PointerDownEvent onPointerDown) {
+              if (onPointerDown.buttons == kMiddleMouseButton) {
+                scrollBtnId = onPointerDown.pointer;
+              }
+            },
+            onPointerUp: (PointerUpEvent onPointerUp) {
+              if (onPointerUp.pointer == scrollBtnId) {
+                scrollBtnId = null;
+              }
+            },
+            onPointerMove: (PointerMoveEvent onPointerMove) {
+              if (scrollBtnId != null) {
+                translateTransform(
+                    onPointerMove.delta.dx, onPointerMove.delta.dy);
+              }
+            },
             onPointerSignal: (pointerSignal) {
-              print(pointerSignal);
               if (pointerSignal is PointerScrollEvent) {
                 final scale = pointerSignal.scrollDelta.dy.sign * 0.2 + 1;
 
@@ -91,9 +126,9 @@ class DrawScreenState extends State<DrawScreen> with TickerProviderStateMixin {
               onScaleEnd: (ScaleEndDetails details) => savePath(),
               onScaleUpdate: (ScaleUpdateDetails scaleUpdateDetails) {
                 // don't update the UI if the scale didn't change
-                if (scaleUpdateDetails.scale == 1.0) {
+                if (scaleUpdateDetails.scale == 1.0 && scrollBtnId == null) {
                   totalPoints += 1;
-                  if (totalPoints % 2 == 0) {
+                  if (totalPoints % 3 == 0) {
                     undonePainters.clear();
                     setState(() {
                       // points = new List.from(points);
@@ -117,11 +152,12 @@ class DrawScreenState extends State<DrawScreen> with TickerProviderStateMixin {
                       points: points,
                       color: color,
                       strokeCap: strokeCap,
-                      strokeWidth: strokeWidth,
+                      strokeWidth:
+                          strokeWidth * _transformation.row0.storage[0],
                       painters: painters),
                   size: Size.infinite,
                   isComplex: true,
-                  // willChange: true,
+                  willChange: true,
                 ),
               ),
             ),
@@ -159,10 +195,7 @@ class DrawScreenState extends State<DrawScreen> with TickerProviderStateMixin {
               onPressed: () {
                 setState(() {
                   for (var painter in painters) {
-                    painter.points = painter.points
-                        .map((e) =>
-                            MatrixUtils.transformPoint(_transformation, e!))
-                        .toList();
+                    painter.transformation = Matrix4.identity();
                   }
                   points = new List.from(points);
                   _transformation = Matrix4.identity();
