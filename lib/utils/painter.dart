@@ -26,17 +26,18 @@ class Painter extends CustomPainter {
     paint.color = color;
     paint.strokeCap = strokeCap;
     paint.strokeWidth = strokeWidth * transformation.row0.storage[0];
-    for (int i = points.length - 2; i >= 0; --i) {
+    for (int i = points.length - 1; i >= 0; --i) {
       canvas.drawLine(
         MatrixUtils.transformPoint(transformation, points[i]),
-        MatrixUtils.transformPoint(transformation, points[i + 1]),
+        MatrixUtils.transformPoint(transformation, points[i - 1]),
         paint,
       );
     }
   }
 
   @override
-  bool shouldRepaint(Painter oldPainter) => oldPainter.points != points;
+  bool shouldRepaint(Painter oldPainter) =>
+      oldPainter.transformation != transformation;
 }
 
 class MyCustomPainter extends CustomPainter {
@@ -49,5 +50,6 @@ class MyCustomPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(Painter oldPainter) => false;
+  bool shouldRepaint(MyCustomPainter oldPainter) =>
+      oldPainter.myBackground != myBackground;
 }
