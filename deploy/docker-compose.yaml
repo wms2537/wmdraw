@@ -1,0 +1,20 @@
+version: '3'
+services:
+  nginx:
+    image: registry-intl.ap-southeast-1.aliyuncs.com/swmeng/wmdraw-client:${BUILD_NUMBER}
+    depends_on:
+      - api
+    expose:
+      - 80
+    environment: 
+      VIRTUAL_HOST: draw.wmtech.cc
+      LETSENCRYPT_HOST: draw.wmtech.cc
+      LETSENCRYPT_EMAIL: swmeng@yes.my
+    restart: unless-stopped
+    container_name: hcaptcha-nginx
+
+
+networks:
+    default:
+        external:
+            name: nginx-proxy

@@ -32,6 +32,5 @@ RUN flutter build web --release
 
 
 FROM nginx
-EXPOSE 4200
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/build/web /usr/share/nginx/html
