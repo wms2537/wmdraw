@@ -249,6 +249,7 @@ class DrawScreenState extends State<DrawScreen> with TickerProviderStateMixin {
                       if (undonePainters.isNotEmpty) {
                         setState(() {
                           painters.add(undonePainters.removeLast());
+                          points = new List.from(points);
                         });
                       }
                     },
@@ -275,6 +276,7 @@ class DrawScreenState extends State<DrawScreen> with TickerProviderStateMixin {
                       }
                       setState(() {
                         undonePainters.add(painters.removeLast());
+                        points = new List.from(points);
                       });
                     },
                   ),
