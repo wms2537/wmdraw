@@ -9,7 +9,7 @@ services:
       LETSENCRYPT_HOST: draw.wmtech.cc
       LETSENCRYPT_EMAIL: swmeng@yes.my
     restart: unless-stopped
-    container_name: hcaptcha-nginx
+    container_name: wmdraw-nginx
 
 
 networks:
