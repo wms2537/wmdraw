@@ -12,7 +12,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  bool buttonEnabled = true;
+  bool buttonEnabled = false;
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
