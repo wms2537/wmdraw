@@ -63,7 +63,7 @@ class HomeScreenState extends State<HomeScreen> {
                               .accentTextTheme
                               .headline6!
                               .color,
-                          fontSize: 50,
+                          fontSize: deviceSize.width > 540 ? 50 : 32,
                           fontWeight: FontWeight.normal,
                         ),
                       ),
@@ -81,29 +81,28 @@ class HomeScreenState extends State<HomeScreen> {
                         margin: EdgeInsets.all(16),
                         height: 600,
                         constraints: BoxConstraints(minHeight: 320),
-                        width: deviceSize.width * 0.6,
-                        padding: EdgeInsets.all(16.0),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ElevatedButton(
-                                onPressed: buttonEnabled
-                                    ? () {
-                                        Navigator.of(context)
-                                            .pushNamed(DrawScreen.routeName);
-                                      }
-                                    : null,
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.pinkAccent,
-                                  padding: EdgeInsets.all(24),
-                                ),
-                                child: Text('Start Drawing'),
+                        width: deviceSize.width > 540
+                            ? deviceSize.width * 0.6
+                            : deviceSize.width * 0.9,
+                        child: Column(
+                          // shrinkWrap: true,
+                          children: [
+                            ElevatedButton(
+                              onPressed: buttonEnabled
+                                  ? () {
+                                      Navigator.of(context)
+                                          .pushNamed(DrawScreen.routeName);
+                                    }
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.pinkAccent,
+                                padding: EdgeInsets.all(24),
                               ),
-                              Container(
+                              child: Text('Start Drawing'),
+                            ),
+                            Expanded(
+                              child: Container(
                                 margin: EdgeInsets.all(16),
-                                width: 360,
-                                height: 500,
                                 child: Captcha((bool success) {
                                   if (success) {
                                     setState(() {
@@ -112,8 +111,8 @@ class HomeScreenState extends State<HomeScreen> {
                                   }
                                 }),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
