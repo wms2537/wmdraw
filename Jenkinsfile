@@ -33,7 +33,7 @@ pipeline {
       steps {
         sshagent(credentials:['ALICLOUD_HONG_KONG_SERVER_KEY']) {
             sh ('scp -o StrictHostKeyChecking=no -r ./deploy root@$SERVER_IP:/root/wmdraw')
-            sh ('ssh -o StrictHostKeyChecking=no root@$SERVER_IP export BUILD_NUMBER=${env.BUILD_NUMBER} && docker login -u $DOCKER_CREDENTIALS_USR -p $DOCKER_CREDENTIALS_PSW registry-intl.ap-southeast-1.aliyuncs.com && cd wmdraw/deploy && sh ./deploy.sh')
+            sh ("ssh -o StrictHostKeyChecking=no root@$SERVER_IP export BUILD_NUMBER=$BUILD_NUMBER && docker login -u $DOCKER_CREDENTIALS_USR -p $DOCKER_CREDENTIALS_PSW registry-intl.ap-southeast-1.aliyuncs.com && cd wmdraw/deploy && sh ./deploy.sh")
           }
       }
     }
